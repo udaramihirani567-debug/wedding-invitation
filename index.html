@@ -71,6 +71,7 @@ h2.h{font-size:34px;font-weight:500;margin-bottom:8px}
 .lb .pv{bottom:calc(10px + env(safe-area-inset-bottom,0px));left:12px;padding:0 18px}
 .lb .nx{bottom:calc(10px + env(safe-area-inset-bottom,0px));right:12px;padding:0 18px}
 .lb button:focus-visible{outline:3px solid #e6c97a;outline-offset:2px}
+#fall{position:fixed;inset:0;width:100%;height:100%;z-index:10;pointer-events:none}
 </style></head><body class="lock">
 
 <header class="hero" id="hero">
@@ -79,6 +80,7 @@ h2.h{font-size:34px;font-weight:500;margin-bottom:8px}
   <div class="title" id="title"><p>Together with their families</p><h1>Sachith &amp; Udara</h1><p>Tuesday, 2 February 2027</p></div>
   <button class="hint" id="hint">Scroll to open the invitation ↓</button>
 </header>
+<canvas id="fall" aria-hidden="true"></canvas>
 <button class="snd" id="snd" aria-label="Mute or unmute sound">Sound</button>
 
 <main id="main">
@@ -130,7 +132,7 @@ h2.h{font-size:34px;font-weight:500;margin-bottom:8px}
   var b=document.body,v=document.getElementById('vid'),tt=document.getElementById('title'),hint=document.getElementById('hint'),snd=document.getElementById('snd'),gate=document.getElementById('gate');
   function sync(){snd.textContent=v.muted?'Sound':'Mute';snd.setAttribute('aria-pressed',String(!v.muted))}
   document.getElementById('open').addEventListener('click',function(){
-    gate.classList.add('off');
+    gate.classList.add('off');startFall();
     v.muted=false;v.loop=true;
     var p=v.play();if(p&&p.catch)p.catch(function(){v.muted=true;v.play();sync()});
     sync();snd.classList.add('on');
@@ -150,6 +152,11 @@ h2.h{font-size:34px;font-weight:500;margin-bottom:8px}
   document.getElementById('lp').addEventListener('click',function(){show(ci-1)});
   document.getElementById('ln').addEventListener('click',function(){show(ci+1)});
   addEventListener('keydown',function(e){if(lb.hidden)return;if(e.key==='Escape')lb.hidden=true;if(e.key==='ArrowLeft')show(ci-1);if(e.key==='ArrowRight')show(ci+1)});
+  var fc=document.getElementById('fall'),fx=fc.getContext('2d'),FW,FH,FP=[],run=false,K=1,calm=matchMedia('(prefers-reduced-motion:reduce)').matches,cols=['rgba(243,201,207,.95)','rgba(255,247,226,.97)','rgba(230,201,122,.9)'];
+  function fs(){K=Math.min(window.devicePixelRatio||1,2);FW=fc.width=innerWidth*K;FH=fc.height=innerHeight*K}
+  function fm(top){var s=.7+Math.random()*.8;return{x:Math.random()*FW,y:top?-30*K:Math.random()*FH,s:s,v:(.6+Math.random()*.8)*s,a:Math.random()*6,r:Math.random()*6,vr:(Math.random()-.5)*.05,f:Math.random()*6,c:cols[Math.floor(Math.random()*3)]}}
+  function fd(){fx.clearRect(0,0,FW,FH);FP.forEach(function(p,i){p.y+=p.v*K*1.1;p.a+=.02;p.x+=Math.sin(p.a)*.7*K;p.r+=p.vr;p.f+=.05;if(p.y>FH+30*K)FP[i]=fm(true);fx.save();fx.translate(p.x,p.y);fx.rotate(p.r);fx.scale(1,Math.abs(Math.cos(p.f))*.6+.4);var L=9*p.s*K;fx.fillStyle=p.c;fx.strokeStyle='rgba(168,131,47,.35)';fx.lineWidth=K*.8;fx.beginPath();fx.ellipse(0,0,L,L*.55,0,0,6.3);fx.fill();fx.stroke();fx.restore()});requestAnimationFrame(fd)}
+  function startFall(){if(run||calm)return;run=true;fs();var n=innerWidth<500?22:34;for(var i=0;i<n;i++)FP.push(fm(false));addEventListener('resize',fs);fd()}
   var T=new Date('2027-02-02T18:30:00+05:30').getTime();
   function tick(){var l=Math.max(0,T-Date.now()),k,o={d:Math.floor(l/864e5),h:Math.floor(l/36e5)%24,m:Math.floor(l/6e4)%60,s:Math.floor(l/1e3)%60};
     for(k in o)document.getElementById(k).textContent=o[k]}
